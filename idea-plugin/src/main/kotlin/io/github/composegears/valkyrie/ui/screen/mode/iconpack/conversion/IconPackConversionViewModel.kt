@@ -5,9 +5,6 @@ import io.github.composegears.valkyrie.generator.imagevector.ImageVectorGenerato
 import io.github.composegears.valkyrie.generator.imagevector.ImageVectorGeneratorConfig
 import io.github.composegears.valkyrie.generator.imagevector.ImageVectorSpecOutput
 import io.github.composegears.valkyrie.parser.IconParser
-import io.github.composegears.valkyrie.parser.isSvg
-import io.github.composegears.valkyrie.parser.isXml
-import io.github.composegears.valkyrie.processing.writter.FileWriter
 import io.github.composegears.valkyrie.settings.InMemorySettings
 import io.github.composegears.valkyrie.settings.ValkyriesSettings
 import io.github.composegears.valkyrie.ui.extension.updateState
@@ -15,9 +12,13 @@ import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.Conver
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.IconPackConversionState.BatchProcessing
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.IconPackConversionState.IconsPickering
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.util.toPainterOrNull
+import io.github.valkyrie.composegears.converter.BatchIcon
+import io.github.valkyrie.composegears.converter.IconName
+import io.github.valkyrie.composegears.converter.IconPack
+import io.github.valkyrie.composegears.converter.filterFormats
+import io.github.valkyrie.composegears.converter.writeToPath
 import java.nio.file.Path
 import kotlin.io.path.extension
-import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
@@ -81,7 +82,7 @@ class IconPackConversionViewModel(
                                 if (icon.iconName == batchIcon.iconName && icon is BatchIcon.Valid) {
                                     icon.copy(
                                         iconPack = when (icon.iconPack) {
-                                            is IconPack.Nested -> icon.iconPack.copy(currentNestedPack = nestedPack)
+                                            is IconPack.Nested -> (icon.iconPack as IconPack.Nested).copy(currentNestedPack = nestedPack)
                                             is IconPack.Single -> icon.iconPack
                                         },
                                     )
@@ -136,50 +137,11 @@ class IconPackConversionViewModel(
 
             _state.updateState { BatchProcessing.ExportingState }
 
-            icons
-                .filterIsInstance<BatchIcon.Valid>()
-                .forEach { icon ->
-                    when (val iconPack = icon.iconPack) {
-                        is IconPack.Nested -> {
-                            val parserOutput = IconParser.toVector(icon.path)
-                            val vectorSpecOutput = ImageVectorGenerator.convert(
-                                vector = parserOutput.vector,
-                                kotlinName = icon.iconName.value,
-                                config = ImageVectorGeneratorConfig(
-                                    packageName = icon.iconPack.iconPackage,
-                                    packName = valkyriesSettings.value.iconPackName,
-                                    nestedPackName = iconPack.currentNestedPack,
-                                    generatePreview = valkyriesSettings.value.generatePreview,
-                                ),
-                            )
-
-                            FileWriter.writeToFile(
-                                content = vectorSpecOutput.content,
-                                outDirectory = "${settings.iconPackDestination}/${iconPack.currentNestedPack.lowercase()}",
-                                fileName = vectorSpecOutput.name,
-                            )
-                        }
-                        is IconPack.Single -> {
-                            val parserOutput = IconParser.toVector(icon.path)
-                            val vectorSpecOutput = ImageVectorGenerator.convert(
-                                vector = parserOutput.vector,
-                                kotlinName = parserOutput.kotlinName,
-                                config = ImageVectorGeneratorConfig(
-                                    packageName = icon.iconPack.iconPackage,
-                                    packName = valkyriesSettings.value.iconPackName,
-                                    nestedPackName = "",
-                                    generatePreview = valkyriesSettings.value.generatePreview,
-                                ),
-                            )
-
-                            FileWriter.writeToFile(
-                                content = vectorSpecOutput.content,
-                                outDirectory = settings.iconPackDestination,
-                                fileName = vectorSpecOutput.name,
-                            )
-                        }
-                    }
-                }
+            icons.writeToPath(
+                packageName = valkyriesSettings.value.iconPackName,
+                outputDirectory = valkyriesSettings.value.iconPackDestination,
+                generatePreview = settings.generatePreview,
+            )
 
             _events.emit(ConversionEvent.ExportCompleted)
             reset()
@@ -218,13 +180,12 @@ class IconPackConversionViewModel(
 
     private fun List<Path>.processFiles() = viewModelScope.launch {
         withContext(Dispatchers.Default) {
-            val paths = filter { it.isRegularFile() && (it.isXml || it.isSvg) }
+            val paths = filterFormats()
 
             if (paths.isNotEmpty()) {
                 _state.updateState { BatchProcessing.ImportValidationState }
                 _state.updateState {
                     val icons = paths
-                        .sortedBy { it.name }
                         .map { path ->
                             when (path.toPainterOrNull(imageScale = 0.1)) {
                                 null -> BatchIcon.Broken(

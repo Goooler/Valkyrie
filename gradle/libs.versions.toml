@@ -10,6 +10,7 @@ kotlinpoet = "com.squareup:kotlinpoet:1.18.1"
 
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
 
 tiamat = "io.github.composegears:tiamat:1.1.0-rc02"
 tiamat-koin = "io.github.composegears:tiamat-koin:1.1.0-rc02"

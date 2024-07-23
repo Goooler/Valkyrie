@@ -33,9 +33,7 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.components.generator.iconpack)
-    implementation(projects.components.generator.imagevector)
-    implementation(projects.components.parser)
+    implementation(projects.components.converter)
 
     compileOnly(compose.desktop.currentOs)
     implementation(compose.desktop.common)

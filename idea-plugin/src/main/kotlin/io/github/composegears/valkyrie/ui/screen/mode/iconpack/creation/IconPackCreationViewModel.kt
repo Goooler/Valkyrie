@@ -5,7 +5,6 @@ import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.vfs.VirtualFileManager
 import io.github.composegears.valkyrie.generator.iconpack.IconPackGenerator
 import io.github.composegears.valkyrie.generator.iconpack.IconPackGeneratorConfig
-import io.github.composegears.valkyrie.processing.writter.FileWriter
 import io.github.composegears.valkyrie.settings.InMemorySettings
 import io.github.composegears.valkyrie.settings.ValkyriesSettings
 import io.github.composegears.valkyrie.ui.domain.model.Mode
@@ -16,6 +15,7 @@ import io.github.composegears.valkyrie.ui.domain.validation.ValidationResult
 import io.github.composegears.valkyrie.ui.extension.updateState
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.creation.InputChange.IconPackName
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.creation.InputChange.PackageName
+import io.github.valkyrie.composegears.converter.writeToPath
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -82,9 +82,8 @@ class IconPackCreationViewModel(
                 ),
             )
 
-            FileWriter.writeToFile(
-                content = iconPack.content,
-                outDirectory = inMemorySettings.current.iconPackDestination,
+            iconPack.content.writeToPath(
+                outputDirectory = inMemorySettings.current.iconPackDestination,
                 fileName = iconPack.name,
             )
 

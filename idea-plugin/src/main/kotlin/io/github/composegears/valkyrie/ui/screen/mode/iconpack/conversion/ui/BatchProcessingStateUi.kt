@@ -41,13 +41,13 @@ import io.github.composegears.valkyrie.ui.foundation.icons.ValkyrieIcons
 import io.github.composegears.valkyrie.ui.foundation.icons.Visibility
 import io.github.composegears.valkyrie.ui.foundation.rememberMutableState
 import io.github.composegears.valkyrie.ui.foundation.theme.PreviewTheme
-import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.BatchIcon
-import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.IconName
-import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.IconPack
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.IconPackConversionState.BatchProcessing.IconPackCreationState
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.ui.batch.FileTypeBadge
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.ui.batch.IconNameField
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.ui.batch.IconPreviewBox
+import io.github.valkyrie.composegears.converter.BatchIcon
+import io.github.valkyrie.composegears.converter.IconName
+import io.github.valkyrie.composegears.converter.IconPack
 import kotlin.io.path.Path
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -126,9 +126,9 @@ private fun ValidIconItem(
                 when (icon.iconPack) {
                     is IconPack.Nested -> {
                         PacksDropdown(
-                            iconPackName = icon.iconPack.iconPackName,
+                            iconPackName = (icon.iconPack as IconPack.Nested).iconPackName,
                             currentNestedPack = icon.iconPack.currentNestedPack,
-                            nestedPacks = icon.iconPack.nestedPacks,
+                            nestedPacks = (icon.iconPack as IconPack.Nested).nestedPacks,
                             onSelectPack = {
                                 onUpdatePack(icon, it)
                             },
@@ -137,7 +137,7 @@ private fun ValidIconItem(
                     is IconPack.Single -> {
                         Text(
                             modifier = Modifier.padding(16.dp),
-                            text = "IconPack: ${icon.iconPack.iconPackName}",
+                            text = "IconPack: ${(icon.iconPack as IconPack.Single).iconPackName}",
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                         )

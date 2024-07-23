@@ -33,7 +33,7 @@ internal class ImageVectorFileSpec(private val config: ImageVectorSpecConfig) {
 
     fun createFileFor(vector: Vector): ImageVectorSpecOutput {
         val backingProperty = backingPropertySpec(
-            name = config.iconName.backingPropertyName(),
+            name = config.iconName.backingPropertyName,
             type = ClassNames.ImageVector,
         )
 

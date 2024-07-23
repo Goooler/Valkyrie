@@ -5,7 +5,7 @@ import com.squareup.kotlinpoet.TypeName
 import io.github.composegears.valkyrie.generator.ext.nullable
 import io.github.composegears.valkyrie.generator.ext.propertySpecBuilder
 
-internal fun String.backingPropertyName() = "_$this"
+internal inline val String.backingPropertyName: String get() = "_$this"
 
 internal fun backingPropertySpec(
     name: String,

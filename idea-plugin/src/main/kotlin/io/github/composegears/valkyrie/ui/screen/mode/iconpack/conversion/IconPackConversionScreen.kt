@@ -52,6 +52,8 @@ import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.ui.Bat
 import io.github.composegears.valkyrie.ui.screen.mode.iconpack.conversion.ui.IconPackPickerStateUi
 import io.github.composegears.valkyrie.ui.screen.preview.CodePreviewScreen
 import io.github.composegears.valkyrie.ui.screen.settings.SettingsScreen
+import io.github.valkyrie.composegears.converter.BatchIcon
+import io.github.valkyrie.composegears.converter.IconName
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
